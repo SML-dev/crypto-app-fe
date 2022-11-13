@@ -1,33 +1,22 @@
-import React, { ChangeEvent, useState } from 'react'
-import { TextField, Button, Link as MuiLink } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
+import { Button, TextField, Link as MuiLink } from '@mui/material'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { useLoginMutation } from '../../apis/auth.api'
-import { User } from '../../models/User'
 import { useAppDispatch } from '../../app/hooks'
 import { setAuthState } from '../../slices/auth/auth.slice'
+import { User } from '../../models/User'
 
 export const LoginForm = () => {
   const [email, setEmail] = useState('')
   const [emailErrored, setEmailErrored] = useState(false)
-
   const [password, setPassword] = useState('')
   const [passwordErrored, setPasswordErrored] = useState(false)
-
   const [login] = useLoginMutation()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const handleChangeEmail = (event: ChangeEvent<HTMLInputElement>) => {
-    setEmail(event.target.value)
-  }
-
-  const handleChangePassword = (event: ChangeEvent<HTMLInputElement>) => {
-    setPassword(event.target.value)
-  }
-
-  const handleLogin = async (event: any) => {
-    event.preventDefault()
-
+  const handleLogin = async () => {
     if (!email) {
       setEmailErrored(true)
     } else {
@@ -36,51 +25,46 @@ export const LoginForm = () => {
     if (!password) {
       setPasswordErrored(true)
     } else {
-      setEmailErrored(false)
+      setPasswordErrored(false)
     }
     try {
-      const respone = (await login({ email, password })) as { data: User }
-      dispatch(setAuthState({ user: respone.data }))
+      const response = (await login({ email, password })) as { data: User }
+      dispatch(setAuthState({ user: response.data }))
       navigate('/')
     } catch (err) {
       console.error(err)
     }
   }
+
   return (
-    <div className='flex justify-center flex-col items-center h-screen gap-8'>
-      <h1 className='text-5xl mb-5'>Login</h1>
+    <div className='flex justify-center items-center flex-col h-screen gap-8'>
+      <h1 className='text-6xl'>Cryptostats</h1>
       <div className='flex flex-col gap-2'>
         <TextField
           label='Email'
           className='w-80'
           type='email'
           required
+          helperText={emailErrored && 'Please enter a valid Email.'}
           value={email}
-          helperText={emailErrored && 'Please enter a valid Email'}
+          onChange={(event) => setEmail(event.target.value)}
           error={emailErrored}
-          onChange={handleChangeEmail}
         />
         <TextField
           label='Password'
-          className='w-80'
           type='password'
+          className='w-80'
           required
+          helperText={passwordErrored && 'Password may not be empty.'}
           value={password}
-          helperText={passwordErrored && 'Password is incorrect'}
+          onChange={(event) => setPassword(event.target.value)}
           error={passwordErrored}
-          onChange={handleChangePassword}
         />
-        <Link to='/signup' className='justify-self-end self-end mt-1'>
+        <Link to='/signup' className='justify-self-start self-start mt-2'>
           <MuiLink>Sign Up</MuiLink>
         </Link>
       </div>
-      <Button
-        type='submit'
-        variant='contained'
-        className='w-80'
-        color='error'
-        onClick={handleLogin}
-      >
+      <Button variant='contained' className='w-80' onClick={handleLogin}>
         <span className='p-1'>Login</span>
       </Button>
     </div>
